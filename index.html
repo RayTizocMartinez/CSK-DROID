@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>Phone</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="media/app-icon/icon-192.png">
+<link rel="apple-touch-icon" href="media/app-icon/icon-192.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="state-off">
+
+<!-- shared gradients for app icons (kept visible-but-empty so every icon can use them) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="g-green" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b6f27a"/><stop offset=".5" stop-color="#5cbf2a"/><stop offset="1" stop-color="#2d7a10"/></linearGradient>
+    <linearGradient id="g-gray" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0f0f0"/><stop offset=".5" stop-color="#a8a8a8"/><stop offset="1" stop-color="#555"/></linearGradient>
+    <linearGradient id="g-orange" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd27a"/><stop offset=".5" stop-color="#f08a1c"/><stop offset="1" stop-color="#a24a00"/></linearGradient>
+    <linearGradient id="g-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7cc7ff"/><stop offset="1" stop-color="#2a6fc9"/></linearGradient>
+  </defs>
+</svg>
+
+<div id="case">
+<div id="device">
+  <!-- desktop-only hardware details (hidden on real phones) -->
+  <div class="hw grip l"></div><div class="hw grip r"></div>
+  <div class="hw grille top"></div><div class="hw grille bot"></div>
+  <div class="hw lens"></div><div class="hw led"></div>
+  <i class="hw screw s1"></i><i class="hw screw s2"></i><i class="hw screw s3"></i><i class="hw screw s4"></i>
+  <div class="hw engrave"></div>
+  <button id="power" aria-label="Power"></button>
+  <div id="screen">
+
+    <div id="statusbar">
+      <div id="sb-left"><div id="sb-icons"></div><div id="sb-ticker"></div></div>
+      <div id="sb-right"><span id="sb-signal"></span><span id="sb-battery"></span><span id="sb-time"></span></div>
+    </div>
+
+    <div id="shade">
+      <div class="shade-head"><span id="shade-carrier"></span><button id="shade-clear">Clear</button></div>
+      <div class="shade-title">Notifications</div>
+      <div id="shade-list"></div>
+      <div class="shade-empty">No notifications</div>
+      <div class="shade-handle"><span></span></div>
+    </div>
+
+    <canvas id="live"></canvas>
+    <div id="stage">
+      <div id="home"></div>
+      <div id="drawer"></div>
+      <div id="appview"></div>
+      <div id="menu"></div>
+    </div>
+
+    <div id="lock"></div>
+    <div id="dialog"></div>
+    <div id="toast"></div>
+    <div id="boot"></div>
+    <div id="off"><div class="off-hint">tap to power on</div></div>
+  </div>
+
+  <div id="navbar">
+    <button data-nav="back"   aria-label="Back"></button>
+    <button data-nav="menu"   aria-label="Menu"></button>
+    <button data-nav="home"   aria-label="Home"></button>
+  </div>
+</div>
+</div>
+
+<script src="js/content.js"></script>
+<script src="js/gallery-index.js"></script>
+<script src="js/os.js"></script>
+<script src="js/apps/phone.js"></script>
+<script src="js/apps/messages.js"></script>
+<script src="js/apps/gallery.js"></script>
+<script src="js/apps/settings.js"></script>
+<script src="js/apps/wallpaper.js"></script>
+<script src="js/apps/podstack.js"></script>
+<script src="js/apps/flappynick.js"></script>
+<script src="js/apps/match3.js"></script>
+<script src="js/apps/flyer.js"></script>
+<script src="js/apps/jar.js"></script>
+<script src="js/apps/maps.js"></script>
+<script src="js/apps/characters.js"></script>
+<script src="js/apps/nickrun.js"></script>
+<script src="js/apps/sled.js"></script>
+<script src="js/apps/balloons.js"></script>
+<script src="js/apps/topple.js"></script>
+<script src="js/prompts-data.js"></script>
+<script src="js/prompts.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

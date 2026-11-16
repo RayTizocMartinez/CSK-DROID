@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gallery Builder</title>
+<style>
+  body { font-family: Segoe UI, Roboto, Arial, sans-serif; background: #111; color: #eee; max-width: 760px; margin: 0 auto; padding: 24px 16px; line-height: 1.5; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  ol { padding-left: 20px; }
+  code { background: #222; padding: 1px 5px; border-radius: 3px; color: #ffd35c; }
+  .pick { display: inline-block; margin: 12px 0; padding: 12px 20px; background: #3fa127; color: #fff; border-radius: 6px; cursor: pointer; font-weight: 600; }
+  .pick input { display: none; }
+  button { padding: 12px 20px; border: 0; border-radius: 6px; background: #ff9500; color: #000; font-weight: 700; font-size: 15px; cursor: pointer; }
+  button:disabled { opacity: .4; cursor: default; }
+  .album { margin: 10px 0; padding: 10px; background: #1b1b1b; border-radius: 6px; }
+  .album b { color: #8fd14f; }
+  .album small { color: #999; display: block; word-break: break-all; }
+  .warn { color: #ff8a7a; }
+  textarea { width: 100%; height: 140px; background: #000; color: #8fd14f; border: 1px solid #333; font: 12px monospace; }
+</style>
+</head>
+<body>
+<h1>Gallery Builder</h1>
+<p>Websites can't look inside folders by themselves, so the phone reads a list of your photos from <code>js/gallery-index.js</code>. This page makes that file for you. Nothing gets uploaded anywhere — it all happens in this browser tab.</p>
+<ol>
+  <li>Put your photos in <code>media/photos</code>. Each subfolder becomes an album (album names and photos are sorted A–Z on the phone).</li>
+  <li>Click the green button and choose your <code>media/photos</code> folder. (Your browser may ask "upload files?" — it isn't uploading, it's just reading names.)</li>
+  <li>Click <b>Download gallery-index.js</b> and put it in the <code>js</code> folder, replacing the old one.</li>
+  <li>Upload <code>media/photos</code> and <code>js/gallery-index.js</code> to GitHub.</li>
+</ol>
+
+<label class="pick">Choose media/photos folder<input type="file" id="pick" webkitdirectory directory multiple></label>
+<div id="out"></div>
+<p><button id="dl" disabled>Download gallery-index.js</button></p>
+<details><summary>Show file contents</summary><textarea id="txt" readonly></textarea></details>
+
+<script>
+var OK = /\.(jpe?g|png|gif|webp)$/i;
+var nat = function (a, b) { return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }); };
+var text = '';
+document.getElementById('pick').addEventListener('change', function (e) {
+  var files = Array.prototype.slice.call(e.target.files);
+  var albums = {}, skipped = [];
+  files.forEach(function (f) {
+    var parts = (f.webkitRelativePath || f.name).split('/');
+    parts.shift();                                   // drop the "photos" folder itself
+    if (!parts.length) return;
+    if (parts[parts.length - 1].charAt(0) === '.') return;
+    if (/readme\.md$/i.test(f.name)) return;
+    if (!OK.test(f.name)) { skipped.push(parts.join('/')); return; }
+    var album = parts.length > 1 ? parts[0] : 'camera roll';
+    (albums[album] = albums[album] || []).push('media/photos/' + parts.join('/'));
+  });
+  var list = Object.keys(albums).sort(nat).map(function (name) {
+    return { name: name, photos: albums[name].sort(function (a, b) { return nat(a.split('/').pop(), b.split('/').pop()); }) };
+  });
+  text = '/* Made by tools/gallery-builder.html — ' + new Date().toISOString().slice(0, 10) + '\n   Rebuild this whenever you add or remove photos. */\n' +
+    'window.GALLERY_INDEX = ' + JSON.stringify({ albums: list }, null, 2) + ';\n';
+  var out = document.getElementById('out');
+  out.innerHTML = list.length ? '' : '<p class="warn">No pictures found in that folder.</p>';
+  list.forEach(function (a) {
+    var d = document.createElement('div'); d.className = 'album';
+    d.innerHTML = '<b></b> — ' + a.photos.length + ' photo(s)<small></small>';
+    d.querySelector('b').textContent = a.name;
+    d.querySelector('small').textContent = a.photos.map(function (p) { return p.split('/').pop(); }).join(', ');
+    out.appendChild(d);
+  });
+  if (skipped.length) {
+    var w = document.createElement('p'); w.className = 'warn';
+    w.textContent = 'Skipped (not jpg/png/gif/webp): ' + skipped.join(', ');
+    out.appendChild(w);
+  }
+  document.getElementById('txt').value = text;
+  document.getElementById('dl').disabled = !list.length;
+});
+document.getElementById('dl').addEventListener('click', function () {
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type: 'text/javascript' }));
+  a.download = 'gallery-index.js';
+  a.click();
+});
+</script>
+</body>
+</html>

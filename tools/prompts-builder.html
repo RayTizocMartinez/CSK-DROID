@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prompts Builder</title>
+<style>
+  body { font-family: Segoe UI, Roboto, Arial, sans-serif; background: #111; color: #eee; max-width: 760px; margin: 0 auto; padding: 24px 16px; line-height: 1.5; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  code { background: #222; padding: 1px 5px; border-radius: 3px; color: #ffd35c; }
+  .pick { display: inline-block; margin: 12px 0; padding: 12px 20px; background: #3fa127; color: #fff; border-radius: 6px; cursor: pointer; font-weight: 600; }
+  .pick input { display: none; }
+  button { padding: 12px 20px; border: 0; border-radius: 6px; background: #ff9500; color: #000; font-weight: 700; font-size: 15px; cursor: pointer; }
+  button:disabled { opacity: .4; cursor: default; }
+  .f { margin: 8px 0; padding: 10px; background: #1b1b1b; border-radius: 6px; }
+  .f b { color: #8fd14f; }
+  .warn { color: #ff8a7a; }
+</style>
+</head>
+<body>
+<h1>Prompts Builder</h1>
+<p>When you open the phone by <b>double-clicking</b> <code>index.html</code>, the browser won't let it read your <code>.txt</code> prompt files. This page packs them into <code>js/prompts-data.js</code> so the Writer's texts work anyway. Nothing is uploaded anywhere.</p>
+<p>Only needed for double-click testing. On GitHub Pages or Live Server the phone reads the <code>.txt</code> files directly.</p>
+<ol>
+  <li>Click the green button and choose your <code>media/prompts</code> folder (or select the .txt files).</li>
+  <li>Click <b>Download prompts-data.js</b> and put it in the <code>js</code> folder, replacing the old one.</li>
+  <li>Do this again whenever you edit the text files.</li>
+</ol>
+<label class="pick">Choose media/prompts folder<input type="file" id="dir" webkitdirectory directory multiple></label>
+<label class="pick" style="background:#2f6fd0">…or pick .txt files<input type="file" id="files" accept=".txt,text/plain" multiple></label>
+<div id="out"></div>
+<p><button id="dl" disabled>Download prompts-data.js</button></p>
+<script>
+var data = {};
+function handle(list) {
+  var txts = Array.prototype.filter.call(list, function (f) { return /\.txt$/i.test(f.name); });
+  var out = document.getElementById('out');
+  if (!txts.length) { out.innerHTML = '<p class="warn">No .txt files found there.</p>'; return; }
+  Promise.all(txts.map(function (f) { return f.text().then(function (t) { return [f.name.replace(/\.txt\.txt$/i, '.txt'), t.replace(/^﻿/, '')]; }); }))
+    .then(function (pairs) {
+      data = {}; out.innerHTML = '';
+      pairs.sort(function (a, b) { return a[0].localeCompare(b[0], undefined, { numeric: true }); }).forEach(function (p) {
+        data[p[0]] = p[1];
+        var n = p[1].split(/\r?\n/).filter(function (l) { l = l.trim(); return l && l[0] !== '#'; }).length;
+        var d = document.createElement('div'); d.className = 'f';
+        d.innerHTML = '<b></b> — ' + n + ' prompt' + (n === 1 ? '' : 's');
+        d.querySelector('b').textContent = p[0];
+        out.appendChild(d);
+      });
+      document.getElementById('dl').disabled = false;
+    });
+}
+document.getElementById('dir').addEventListener('change', function (e) { handle(e.target.files); });
+document.getElementById('files').addEventListener('change', function (e) { handle(e.target.files); });
+document.getElementById('dl').addEventListener('click', function () {
+  var text = '/* Made by tools/prompts-builder.html on ' + new Date().toISOString().slice(0, 10) + '. Only used when the phone is opened by double-clicking index.html\n   (browsers block reading the .txt files then). Rebuild it after editing media/prompts/*.txt. */\n' +
+    'window.PROMPT_FILES = ' + JSON.stringify(data, null, 2) + ';\n';
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type: 'text/javascript' }));
+  a.download = 'prompts-data.js';
+  a.click();
+});
+</script>
+</body>
+</html>
