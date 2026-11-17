@@ -270,7 +270,9 @@ window.PHONE_CONTENT = {
   characters: {
     name: "Killmiibos",
     list: [
-      { name: "Mega Nick", model: "mega-nick-1.glb", bio: "" }
+      { name: "Mega Nick", model: "mega-nick-1.glb", bio: "" },
+      { name: "Rodichu", model: "rodichu-1.glb", bio: "" },
+      { name: "Super Rocco", model: "super-rocco-1.glb", bio: "" }
       // { name: "Nick", model: "nick.glb", bio: "Fell into a jar once." },
     ]
   },
