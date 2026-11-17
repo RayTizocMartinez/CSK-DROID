@@ -1,6 +1,6 @@
 {
-  "name": "Eclair Phone",
-  "short_name": "Phone",
+  "name": "killdroid",
+  "short_name": "killdroid",
   "description": "A found Android phone from 2010. Promo for a live stand-up show.",
   "start_url": "./",
   "scope": "./",
