@@ -23,6 +23,7 @@
     ['Accessibility', 'Manage accessibility options'],
     ['Text-to-speech', 'Set text-to-speech options'],
     ['Date & time', 'Set date, time, time zone & format'],
+    ['System update', 'Download the latest system software', 'update'],
     ['About phone', 'View legal info, phone status, software version', 'about']
   ];
 
@@ -57,6 +58,7 @@
             if (it[2] === 'sound') sound();
             else if (it[2] === 'privacy') privacy();
             else if (it[2] === 'about') about();
+            else if (it[2] === 'update') sysUpdate();
             else OS.toast(it[0] + ' is locked by the owner');
           });
         });
@@ -74,6 +76,17 @@
         list.appendChild(OS.el('div', 'list-head', 'Display settings'));
         row(list, 'Brightness', null, function () { OS.toast('Brightness is fine. Trust us.'); });
         row(list, 'Screen timeout', 'Never', null);
+      }
+      function sysUpdate() {
+        OS.dialog({ title: 'System update', text: 'A system update is available.\n\nDownload and install it now? Your messages and secrets are kept. The phone will restart.',
+          buttons: [{ label: 'Install now', action: function () {
+            OS.toast('Downloading update\u2026');
+            var jobs = [];
+            // drop the offline cache + nudge the service worker so the newest upload loads
+            if (window.caches) jobs.push(caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }));
+            if (navigator.serviceWorker) jobs.push(navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.map(function (r) { return r.update().catch(function () {}); })); }));
+            Promise.all(jobs).catch(function () {}).then(function () { setTimeout(function () { location.reload(); }, 800); });
+          } }, { label: 'Later' }] });
       }
       function privacy() {
         page = 'sub';
