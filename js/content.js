@@ -52,6 +52,7 @@
      "game-over:balloons"          Balloon Heist ran out of knives
      "game-over:topple"            Mask Stack tower fell (data = { height })
      "clikcok-session"             closed ClikCok (data = milliseconds scrolled)
+     "barkpod-feed"                BARKPOD loaded the podcast feed
      "sled-play" / "sled-crash"    Line Ryder started a ride / the rider fell off
      "game-over:match3"            a match-3 run ended
    ===================================================================== */
@@ -121,7 +122,7 @@ window.PHONE_CONTENT = {
      icons to move them, so this only applies until they rearrange
      (or do a factory reset). */
   home: {
-    icons: ["messages", "gallery", "contacts", "settings", "podstack", "flappynick", "match3", "flyer", "jar", "maps", "characters", "nickrun", "sled", "balloons", "topple", "clikcok"],
+    icons: ["barkpod", "gallery", "contacts", "settings", "podstack", "flappynick", "match3", "flyer", "jar", "maps", "characters", "nickrun", "sled", "balloons", "topple", "clikcok"],
     dock:  ["phone", "messages"],                             // left and right of the drawer tab
     // extra pictures for the Wallpapers picker (long-press the home screen).
     // Anything named wallpaper-1.jpg, background-1.jpg ... in media/wallpaper
@@ -276,6 +277,17 @@ window.PHONE_CONTENT = {
       { name: "Super Rocco", model: "super-rocco-1.glb", bio: "" }
       // { name: "Nick", model: "nick.glb", bio: "Fell into a jar once." },
     ]
+  },
+
+  /* ---------------- BARKPOD ----------------
+     The podcast player. Reads the RSS feed live, so new episodes show up on their own.
+     Listeners can stream, or tap download to keep an episode for offline. */
+  barkpod: {
+    name:         "BARKPOD",
+    feed:         "https://feed.podbean.com/MICDOGSSA/feed.xml",
+    checkMinutes: 30,           // how often to look for new episodes while someone has the phone open
+    skipBack:     15,           // seconds
+    skipForward:  30
   },
 
   /* ---------------- CLIKCOK ----------------

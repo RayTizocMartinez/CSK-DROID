@@ -23,6 +23,7 @@ Replacement home screen / app drawer icons. Leave this empty to use the built-in
 | Balloon Heist | `balloons.png` |
 | Mask Stack | `topple.png` |
 | ClikCok | `clikcok.png` |
+| BARKPOD | `barkpod.png` |
 
 New apps (games, etc.) will follow the same pattern: their id + `.png`.
 

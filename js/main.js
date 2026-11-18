@@ -439,9 +439,15 @@
   OS.rebuildLauncher = function () { buildHome(); buildDrawer(); };
 
   // unread count bubble on the Messaging icons
+  // other apps can put a number on their icon too: OS.setBadge('barkpod', 2)
+  OS.badges = OS.badges || {};
+  OS.setBadge = function (id, n) { OS.badges[id] = n || 0; updateBadges(); };
   function updateBadges() {
-    var n = OS.sms ? OS.sms.totalUnread() : 0;
-    Array.prototype.forEach.call(document.querySelectorAll('.icon-wrap[data-app="messages"] .badge'), function (b) {
+    var counts = {}, k;
+    for (k in OS.badges) counts[k] = OS.badges[k];
+    counts.messages = OS.sms ? OS.sms.totalUnread() : 0;
+    Array.prototype.forEach.call(document.querySelectorAll('.icon-wrap[data-app] .badge'), function (b) {
+      var n = counts[b.parentNode.getAttribute('data-app')] || 0;
       b.textContent = n > 99 ? '99+' : n; b.classList.toggle('on', n > 0);
     });
   }
