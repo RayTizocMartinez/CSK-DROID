@@ -544,3 +544,41 @@ video.lw-preview { object-fit: cover; }
 
 /* ---------- settings ---------- */
 .app-settings .row { min-height: 66px; }
+
+/* ---------- ClikCok ---------- */
+.ck { background: #000; color: #fff; overflow: hidden; }
+.ck-feed { position: absolute; inset: 0; overflow: hidden; touch-action: none; }
+.ck-slide { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: #000; will-change: transform; }
+.ck-vid { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+.ck-slide.empty .ck-cap, .ck-slide.empty .ck-bar { display: none; }
+.ck-paused { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 46px; opacity: 0; color: rgba(255,255,255,.75); pointer-events: none; transition: opacity .15s; text-shadow: 0 2px 8px rgba(0,0,0,.6); }
+.ck-slide.is-paused .ck-paused { opacity: 1; }
+.ck-cap { position: absolute; left: 10px; right: 60px; bottom: 16px; font-size: 13px; line-height: 1.35; text-shadow: 0 1px 3px rgba(0,0,0,.8); pointer-events: none; }
+.ck-handle { font-size: 14px; }
+.ck-song { font-size: 12px; opacity: .9; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ck-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: rgba(255,255,255,.2); pointer-events: none; }
+.ck-bar i { display: block; height: 100%; width: 0; background: #fff; }
+.ck-top { position: absolute; top: 8px; left: 0; right: 0; text-align: center; font-size: 14px; pointer-events: none; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+.ck-tab { margin: 0 8px; opacity: .65; }
+.ck-tab.on { opacity: 1; border-bottom: 2px solid #fff; padding-bottom: 2px; }
+.ck-timer { position: absolute; top: 9px; right: 8px; font: 10px/1 monospace; padding: 3px 5px; border-radius: 3px; background: rgba(0,0,0,.45); color: #fff; opacity: .85; pointer-events: none; }
+.ck-mute { position: absolute; right: 10px; bottom: 22px; width: 34px; height: 34px; border-radius: 50%; border: 0; background: rgba(0,0,0,.45) center / 20px no-repeat;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 9h4l5-4v14l-5-4H4z' fill='%23fff'/%3E%3Cpath d='M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12' stroke='%23fff' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); }
+.ck-mute.off { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 9h4l5-4v14l-5-4H4z' fill='%23fff'/%3E%3Cpath d='M16 9l6 6M22 9l-6 6' stroke='%23fe2c55' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E"); }
+.ck-over { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,.72); z-index: 5; }
+.ck-over.show { display: flex; }
+.ck-card { position: relative; width: 84%; text-align: center; padding: 22px 14px 18px; border-radius: 12px; background: #161823; box-shadow: 0 0 0 1px #2a2c38, -3px -3px 0 #25f4ee, 3px 3px 0 #fe2c55; overflow: hidden; }
+.ck-card.plain { background: transparent; box-shadow: none; }
+.ck-logo svg { width: 72px; height: 72px; }
+.ck-name { font-size: 26px; font-weight: bold; letter-spacing: -.5px; margin-top: 6px; text-shadow: -2px -1px 0 #25f4ee, 2px 1px 0 #fe2c55; }
+.ck-sub { font-size: 13px; opacity: .75; margin: 4px 0 18px; }
+.ck-cong { font-size: 24px; font-weight: bold; text-shadow: -2px -1px 0 #25f4ee, 2px 1px 0 #fe2c55; }
+.ck-you { font-size: 13px; opacity: .8; margin-top: 10px; }
+.ck-big { font-size: 20px; font-weight: bold; margin: 4px 0 8px; color: #ffd23a; }
+.ck-verdict { font-size: 13px; line-height: 1.4; }
+.ck-total { font-size: 11px; opacity: .6; margin: 10px 0 16px; }
+.ck-go { border: 0; border-radius: 4px; background: #fe2c55; color: #fff; font: bold 15px inherit; font-family: inherit; padding: 10px 22px; }
+.ck-go:active { background: #d9244a; }
+.ck-confetti { position: absolute; inset: 0; pointer-events: none; }
+.ck-confetti i { position: absolute; top: -10px; width: 5px; height: 9px; animation: ck-fall linear infinite; }
+@keyframes ck-fall { to { transform: translateY(330px) rotate(540deg); } }

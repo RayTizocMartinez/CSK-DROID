@@ -51,6 +51,7 @@
      "level-clear:balloons"        Balloon Heist level cleared (data = level number)
      "game-over:balloons"          Balloon Heist ran out of knives
      "game-over:topple"            Mask Stack tower fell (data = { height })
+     "clikcok-session"             closed ClikCok (data = milliseconds scrolled)
      "sled-play" / "sled-crash"    Line Ryder started a ride / the rider fell off
      "game-over:match3"            a match-3 run ended
    ===================================================================== */
@@ -120,7 +121,7 @@ window.PHONE_CONTENT = {
      icons to move them, so this only applies until they rearrange
      (or do a factory reset). */
   home: {
-    icons: ["messages", "gallery", "contacts", "settings", "podstack", "flappynick", "match3", "flyer", "jar", "maps", "characters", "nickrun", "sled", "balloons", "topple"],
+    icons: ["messages", "gallery", "contacts", "settings", "podstack", "flappynick", "match3", "flyer", "jar", "maps", "characters", "nickrun", "sled", "balloons", "topple", "clikcok"],
     dock:  ["phone", "messages"],                             // left and right of the drawer tab
     // extra pictures for the Wallpapers picker (long-press the home screen).
     // Anything named wallpaper-1.jpg, background-1.jpg ... in media/wallpaper
@@ -274,6 +275,19 @@ window.PHONE_CONTENT = {
       { name: "Rodichu", model: "rodichu-1.glb", bio: "" },
       { name: "Super Rocco", model: "super-rocco-1.glb", bio: "" }
       // { name: "Nick", model: "nick.glb", bio: "Fell into a jar once." },
+    ]
+  },
+
+  /* ---------------- CLIKCOK ----------------
+     Endless 5-second videos, played in random order. No likes; just a tiny timer.
+     Videos go in media/clikcok/ named clok0000.mp4, clok0001.mp4 ... (see the README there). */
+  clikcok: {
+    name:   "ClikCok",
+    count:  100,                // looks for clok0000 ... clok0100 (keeps going if there are more)
+    handle: "@clikcok",         // shown on every video
+    tags:   ["#fyp", "#foryou", "#clok", "#doomscroll", "#5seconds", "#coldstartkillers", "#nolikes", "#keepscrolling"],
+    rewards: [
+      // { minutes: 60, action: { type: "sms", thread: "booker", text: "an hour?? on clikcok??", delay: 3 } }   total minutes ever
     ]
   },
 
