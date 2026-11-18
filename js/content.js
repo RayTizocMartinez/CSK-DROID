@@ -145,12 +145,12 @@ window.PHONE_CONTENT = {
   contacts: [
     { id: "mom", name: "Mom", number: "210-555-0142",
       voicemailText: "Hi honey, it's Mom. I saw your show flyer on the fridge at your aunt's house. You put my phone number on it? People keep calling me. Call me back." },
-    { id: "booker", name: "The Booker", number: "210-555-0199",
+    { id: "booker", name: "Dabbin Dan", number: "210-555-0199",
       voicemailText: "Yeah it's me. The venue says you're on at nine, not eight. Or eight, not nine. Just be there at both. Bye." },
     { id: "donotanswer", name: "DO NOT ANSWER", number: "000-000-0000", ringSeconds: 9,
       voicemailText: "You called back. Nobody calls back. Check your pictures." },
-    { id: "writer", name: "The Writer", number: "210-555-0168",
-      voicemailText: "It's the writer. I'm writing. Rate the prompts, I can see when you don't." },
+    { id: "writer", name: "Ray", number: "210-555-0168",
+      voicemailText: "It's Ray. I'm writing. Rate the prompts, I can see when you don't." },
     { id: "landlord", name: "Landlord", number: "210-555-0117",
       voicemailText: "This is about the noise. The laughing. At three in the morning. Please stop rehearsing in the bathtub." }
   ],
@@ -207,7 +207,7 @@ window.PHONE_CONTENT = {
   prompts: {
     enabled:  true,
     thread:   "writer",                     // contact id that sends them
-    name:     "The Writer",
+    name:     "Ray",
     folder:   "media/prompts/",
     files:    ["text-1.txt", "text-2.txt", "text-3.txt"],
     framings: [
