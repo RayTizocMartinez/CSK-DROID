@@ -21,6 +21,9 @@
      { type:"sound",  file:"media/...mp3" }         play an audio file
      { type:"link",   url:"https://..." }           open a real web page
      { type:"flag",   name:"something" }            remember a secret
+     { type:"tickets", amount:50 }                 give Drink Tickets (CSK TCG currency)
+     { type:"pack" }                               give a free CSK TCG card pack
+     { type:"card",   id:"comic-11" }              give a specific card (ids are in js/cards.js)
    Add  delay:5  to any action to wait 5 seconds first.
    Use a list [ {...}, {...} ] to do several things in a row.
 

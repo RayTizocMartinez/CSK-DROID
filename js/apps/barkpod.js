@@ -233,7 +233,14 @@
     OS.notify({ title: K.name, text: ep.title, icon: 'podcast', tag: 'barkpod-now', replace: true, quiet: true,
       onTap: function () { OS.open(ID, { episode: ep.id }); } });
   }
-  audio.addEventListener('timeupdate', function () { savePos(false); });
+  var listened = 0, lastT = null;
+  audio.addEventListener('timeupdate', function () {
+    savePos(false);
+    // every 2 minutes actually listened = 1 Drink Ticket in the card game
+    var now = Date.now();
+    if (lastT && !audio.paused) { var dt = Math.min(5000, now - lastT) * (audio.playbackRate || 1); listened += dt; if (listened >= 120000) { listened -= 120000; OS.emit('barkpod-listened'); } }
+    lastT = audio.paused ? null : now;
+  });
   audio.addEventListener('pause', function () { savePos(true); nowPlayingNote(); OS.emit('barkpod-state'); });
   audio.addEventListener('play', function () { nowPlayingNote(); OS.emit('barkpod-state'); });
   audio.addEventListener('ended', function () { savePos(true); delete positions[nowId]; played[nowId] = 1; save('pos', positions); save('played', played); nowPlayingNote(); OS.emit('barkpod-state'); });

@@ -2,11 +2,11 @@
    Visitors always get your newest upload when online, and the phone
    still opens offline with whatever they've already seen.
    You do NOT need to edit this when you add media. */
-var CACHE = 'eclair-phone-v25';
+var CACHE = 'eclair-phone-v26';
 var SHELL = [
   './', './index.html', './manifest.json', './css/style.css',
   './js/content.js', './js/gallery-index.js', './js/os.js', './js/main.js',
-  './js/apps/phone.js', './js/apps/messages.js', './js/apps/gallery.js', './js/apps/settings.js', './js/apps/wallpaper.js', './js/apps/podstack.js', './js/apps/flappynick.js', './js/apps/match3.js', './js/apps/flyer.js', './js/apps/jar.js', './js/apps/maps.js', './js/apps/characters.js', './js/apps/nickrun.js', './js/apps/sled.js', './js/apps/balloons.js', './js/apps/topple.js', './js/apps/clikcok.js', './js/apps/barkpod.js', './js/lib/matter.min.js', './js/prompts-data.js', './js/prompts.js',
+  './js/apps/phone.js', './js/apps/messages.js', './js/apps/gallery.js', './js/apps/settings.js', './js/apps/wallpaper.js', './js/apps/podstack.js', './js/apps/flappynick.js', './js/apps/match3.js', './js/apps/flyer.js', './js/apps/jar.js', './js/apps/maps.js', './js/apps/characters.js', './js/apps/nickrun.js', './js/apps/sled.js', './js/apps/balloons.js', './js/apps/topple.js', './js/apps/clikcok.js', './js/apps/barkpod.js', './js/apps/csktcg.js', './js/cards.js', './js/tcg-engine.js', './js/tcg-core.js', './js/lib/matter.min.js', './js/prompts-data.js', './js/prompts.js',
   './media/app-icon/icon-192.png'
 ];
 self.addEventListener('install', function (e) {

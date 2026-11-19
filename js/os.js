@@ -465,7 +465,7 @@
         case 'link': window.open(a.url, '_blank', 'noopener'); break;
         case 'flag': OS.setFlag(a.name); break;
         case 'event': OS.emit(a.name); break;
-        default: console.warn('Unknown action', a);
+        default: if (OS.actions && OS.actions[a.type]) OS.actions[a.type](a); else console.warn('Unknown action', a);
       }
     }
     if (a.delay) setTimeout(go, a.delay * 1000); else go();
