@@ -130,7 +130,7 @@ window.PHONE_CONTENT = {
     // Apps left out of this list get added after these on their own. null = an empty spot.
     icons: ["promptmachine", "oldtwitter", "barkpod", "gallery", "clikcok", "characters", "maps", "flyer", "contacts",
             "settings", "jar",
-            "csktcg", "nickrun", "podstack", "flappynick", "match3", "sled", "balloons", "topple"],
+            "csktcg", "ticketdash", "nickrun", "podstack", "flappynick", "match3", "sled", "balloons", "topple"],
     dock:  ["phone", "messages"],                             // left and right of the drawer tab
     // extra pictures for the Wallpapers picker (long-press the home screen).
     // Anything named wallpaper-1.jpg, background-1.jpg ... in media/wallpaper
@@ -453,6 +453,20 @@ window.PHONE_CONTENT = {
       startDarts: 6,              // knives on level 1 (one fewer every 5 levels, never under 4)
       rewards: [
         // { level: 10, action: { type: "sms", thread: "booker", text: "...", delay: 3 } }
+      ]
+    },
+    ticketdash: {
+      // 3D endless runner. The runner is media/games/ticketdash/runner.glb (Bill); street + obstacles are built in code.
+      name:       "Open Mic Run",
+      startSpeed: 13,
+      maxSpeed:   34,
+      speedUp:    0.22,          // how fast it gets harder
+      bodyColor:  "#f2c230",     // runner's suit
+      maskColor:  "#141414",     // ski mask
+      pomColor:   "#ff3b3b",     // pom-pom
+      signText:   "LOW CLEARANCE",   // the sign you slide under
+      rewards: [
+        // { tickets: 100, action: { type: "sms", thread: "booker", text: "100 tickets in one run??", delay: 3 } }   best run ever
       ]
     },
     nickrun: {

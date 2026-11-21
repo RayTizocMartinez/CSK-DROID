@@ -180,6 +180,7 @@ window.TCG = {
     flappynick: { event: "game-over:flappynick", field: "score", per: 1,  label: "Flappy Nick" },
     match3:     { event: "game-over:match3",    field: "boards", per: 0.1, label: "Match Killer" },   // 10 per board cleared
     nickrun:    { event: "game-over:nickrun",   field: "meters", per: 50, label: "Nick Run" },
+    ticketdash: { event: "game-over:ticketdash", field: "tickets", per: 1, label: "Open Mic Run" },   // every ticket grabbed = 1 Drink Ticket
     balloons:   { event: "level-clear:balloons", field: null,    flat: 10, label: "Balloon Heist" },
     topple:     { event: "game-over:topple",    field: "height", per: 0.5, label: "Mask Stack" },     // 2 per block tall
     sled:       { event: "sled-crash",          field: null,     ticksPer: 200, max: 20, label: "Line Ryder" },  // 1 per 5 seconds ridden

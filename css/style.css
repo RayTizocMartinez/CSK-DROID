@@ -969,3 +969,26 @@ video.lw-preview { object-fit: cover; }
 .ot-name { width: 100%; box-sizing: border-box; border: 1px solid #aaa; border-radius: 3px; padding: 7px; font: 15px "Lucida Grande", Arial, sans-serif; margin-bottom: 6px; }
 .ot-save { width: 100%; margin-top: 8px; padding: 8px; background: linear-gradient(#9ae4ff, #33b5e5); border-color: #1d93c4; color: #fff; text-shadow: 0 -1px 0 rgba(0,0,0,.25); }
 .ot-fine { color: #999; font-size: 11px; line-height: 1.4; margin-top: 12px; }
+
+/* ---------------- TICKET DASH ---------------- */
+.td { background: #a9dcff; }
+.td-load { margin: auto; color: #234; font: bold 15px "Droid Sans", Roboto, Arial, sans-serif; padding: 20px; text-align: center; }
+.td-cv { position: absolute; inset: 0; background: #a9dcff; }
+.td-hud { position: absolute; left: 0; right: 0; top: 0; display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; pointer-events: none; font: bold 20px "Droid Sans", Roboto, Arial, sans-serif; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.45); z-index: 2; }
+.td-tix { display: flex; align-items: center; gap: 6px; }
+.td-tix i, .td-big i { display: inline-block; width: 26px; height: 15px; background: #ffd84d; border: 2px dashed #a07800; border-radius: 2px; box-shadow: 0 2px 0 rgba(0,0,0,.35); transform: rotate(-8deg); }
+.td-tix.pop b { animation: tdPop .25s ease-out; display: inline-block; }
+@keyframes tdPop { 50% { transform: scale(1.35); color: #ffe36b; } }
+.td-over { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; z-index: 3; background: rgba(10,30,50,.25); }
+.td-over.on { display: flex; }
+.td-over.low { align-items: flex-end; padding-bottom: 7%; background: none; }
+.td-title .td-hud { visibility: hidden; }
+.td-card { background: rgba(255,255,255,.94); border-radius: 12px; padding: 16px 18px 18px; width: 78%; max-width: 280px; text-align: center; color: #223; font-family: "Droid Sans", Roboto, Arial, sans-serif; box-shadow: 0 6px 20px rgba(0,0,0,.3); }
+.td-card h1 { margin: 0 0 8px; font-size: 30px; letter-spacing: 1px; color: #e0a800; text-shadow: 0 2px 0 #7a5a00; font-style: italic; }
+.td-card h2 { margin: 0 0 6px; font-size: 26px; color: #e53030; font-style: italic; }
+.td-card p { margin: 6px 0; font-size: 13px; line-height: 1.45; }
+.td-best { color: #567; } .td-pay { color: #8a6a00; font-weight: bold; } .td-new { color: #e0a800; font-weight: bold; font-size: 16px !important; }
+.td-big { font-size: 40px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.td-big i { width: 34px; height: 20px; }
+.td-go { margin-top: 10px; width: 100%; border: 0; border-radius: 8px; padding: 12px; font: bold 18px "Droid Sans", Roboto, Arial, sans-serif; color: #fff; background: linear-gradient(#ffcf3a, #e09a00); box-shadow: 0 3px 0 #9a6a00; letter-spacing: 2px; }
+.td-go:active { transform: translateY(2px); box-shadow: 0 1px 0 #9a6a00; }
