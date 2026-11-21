@@ -910,3 +910,62 @@ video.lw-preview { object-fit: cover; }
 .pm-item.wait { border-left-color: #ffb000; }
 .pm-empty { color: #3f8f3d; font-size: 14px; }
 .pm-fine { color: #3f8f3d; font-size: 12px; margin-top: 18px; line-height: 1.35; }
+
+/* ---------------- OLD TWITTER ---------------- */
+.ot { background: #c0deed linear-gradient(180deg, #9ad8f2 0, #c0deed 140px); color: #333; font-family: "Lucida Grande", "Helvetica Neue", Arial, sans-serif; font-size: 13px; }
+.ot-top { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px 6px; position: relative; }
+.ot-top::before { content: ""; position: absolute; left: 34px; top: 6px; width: 70px; height: 18px; border-radius: 20px; background: #fff; opacity: .45; box-shadow: 120px 10px 0 -3px #fff, 190px -2px 0 2px rgba(255,255,255,.6); pointer-events: none; }
+.ot-logo { position: relative; font-family: "Arial Rounded MT Bold", "Varela Round", "Nunito", Arial, sans-serif; font-weight: bold; font-size: 26px; letter-spacing: -.5px; color: #33ccff; text-shadow: 0 1px 0 #fff, 0 2px 0 #1da0d8, 0 3px 3px rgba(0,60,100,.35); }
+.ot-me { position: relative; border: 0; background: none; padding: 0; color: #0084b4; font: bold 13px inherit; }
+.ot-me img { width: 32px; height: 32px; border-radius: 4px; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); display: block; }
+.ot-me span { background: #fff; border-radius: 4px; padding: 6px 10px; display: block; box-shadow: 0 1px 2px rgba(0,0,0,.2); }
+.ot-body { flex: 1; min-height: 0; overflow-y: auto; padding: 0 8px 18px; }
+.ot-page { background: #fff; border-radius: 6px; min-height: 100%; box-shadow: 0 1px 3px rgba(0,60,100,.25); transition: transform .15s; overflow: hidden; }
+.ot-box { padding: 10px 10px 8px; border-bottom: 1px solid #e6e6e6; background: #f9fdff; }
+.ot-q { font-size: 17px; color: #333; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: baseline; }
+.ot-cnt { font-size: 18px; color: #ccc; font-family: Georgia, serif; }
+.ot-cnt.warn { color: #5c0002; } .ot-cnt.red { color: #d40d12; }
+.ot-in { width: 100%; box-sizing: border-box; border: 1px solid #aaa; border-radius: 3px; padding: 6px; font: 14px "Lucida Grande", Arial, sans-serif; resize: none; box-shadow: inset 0 1px 2px rgba(0,0,0,.12); }
+.ot-in:focus { outline: none; border-color: #56b4ef; box-shadow: 0 0 4px rgba(82,168,236,.6); }
+.ot-row { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+.ot-go, .ot-save, .ot-signup, .ot-edit { border: 1px solid #b5b5b5; border-radius: 4px; background: linear-gradient(#fff, #ddd); color: #333; font: bold 13px "Lucida Grande", Arial, sans-serif; padding: 5px 14px; }
+.ot-go:active, .ot-save:active, .ot-signup:active { background: linear-gradient(#ddd, #fff); }
+.ot-go:disabled, .ot-save:disabled { color: #999; }
+.ot-st { color: #888; font-size: 12px; } .ot-st.err { color: #d40d12; }
+.ot-join { padding: 12px; background: #ffffe0; border-bottom: 1px solid #e6e6c0; line-height: 1.4; }
+.ot-join b { font-size: 15px; display: block; }
+.ot-signup { display: block; margin-top: 8px; background: linear-gradient(#ffe36b, #f8c400); border-color: #d9a900; padding: 7px 14px; }
+.ot-tabs { display: flex; align-items: center; gap: 4px; padding: 6px 8px; border-bottom: 1px solid #e6e6e6; }
+.ot-tabs button { border: 0; background: none; color: #0084b4; font: 13px inherit; padding: 4px 8px; border-radius: 3px; }
+.ot-tabs button.on { background: #e8f6fc; color: #333; font-weight: bold; }
+.ot-pull { margin-left: auto; color: #bbb; font-size: 11px; }
+.ot-new { display: block; width: 100%; border: 0; border-bottom: 1px solid #e0d9a5; background: #fffbd6; color: #0084b4; padding: 8px; text-align: center; font-weight: bold; }
+.ot-new[hidden] { display: none; }
+.ot-tw { display: flex; gap: 8px; padding: 9px 8px; border-bottom: 1px dashed #ddd; }
+.ot-av { width: 44px; height: 44px; border-radius: 3px; flex: 0 0 auto; background: #8ccfe8; object-fit: cover; }
+.ot-tx { flex: 1; min-width: 0; line-height: 1.35; word-wrap: break-word; overflow-wrap: anywhere; }
+.ot-nm { color: #0084b4; }
+.ot-tag, .ot-at { color: #0084b4; font-weight: normal; }
+.ot-meta { color: #999; font-size: 11px; margin-top: 3px; }
+.ot-act { display: flex; flex-direction: column; align-items: center; flex: 0 0 26px; }
+.ot-star { border: 0; background: none; font-size: 19px; line-height: 1; color: #ccc; padding: 0; }
+.ot-star.on { color: #f6b300; text-shadow: 0 0 1px #c88a00; }
+.ot-star.pop { animation: otPop .35s ease-out; }
+@keyframes otPop { 40% { transform: scale(1.5); } }
+.ot-n { font-size: 11px; color: #999; min-height: 12px; }
+.ot-more { border: 0; background: none; color: #bbb; font-size: 16px; padding: 4px 0 0; }
+.ot-empty { padding: 26px 12px; text-align: center; color: #999; }
+.ot-prof { display: flex; gap: 12px; padding: 12px; border-bottom: 1px solid #e6e6e6; background: #f9fdff; }
+.ot-prof img { width: 72px; height: 72px; border-radius: 4px; border: 1px solid #ccc; padding: 2px; background: #fff; object-fit: cover; }
+.ot-prof h2 { margin: 2px 0 4px; font-size: 20px; color: #333; }
+.ot-stats { display: flex; gap: 12px; color: #666; font-size: 12px; margin-bottom: 6px; } .ot-stats b { color: #333; font-size: 14px; }
+.ot-edit { padding: 3px 10px; font-size: 12px; }
+.ot-setup { padding: 14px; }
+.ot-setup h2 { margin: 0 0 12px; font-size: 19px; }
+.ot-pick { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.ot-pick img { width: 72px; height: 72px; border-radius: 4px; border: 1px solid #ccc; padding: 2px; object-fit: cover; }
+.ot-photo { border: 0; background: none; color: #0084b4; font: bold 13px inherit; text-decoration: underline; }
+.ot-setup label { display: block; font-weight: bold; margin-bottom: 4px; }
+.ot-name { width: 100%; box-sizing: border-box; border: 1px solid #aaa; border-radius: 3px; padding: 7px; font: 15px "Lucida Grande", Arial, sans-serif; margin-bottom: 6px; }
+.ot-save { width: 100%; margin-top: 8px; padding: 8px; background: linear-gradient(#9ae4ff, #33b5e5); border-color: #1d93c4; color: #fff; text-shadow: 0 -1px 0 rgba(0,0,0,.25); }
+.ot-fine { color: #999; font-size: 11px; line-height: 1.4; margin-top: 12px; }

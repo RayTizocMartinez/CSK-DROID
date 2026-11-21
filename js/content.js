@@ -128,7 +128,7 @@ window.PHONE_CONTENT = {
   home: {
     // In order across the home pages: the first 16 are page 1, the next 16 page 2, and so on.
     // Apps left out of this list get added after these on their own. null = an empty spot.
-    icons: ["promptmachine", "barkpod", "gallery", "clikcok", "characters", "maps", "flyer", "contacts",
+    icons: ["promptmachine", "oldtwitter", "barkpod", "gallery", "clikcok", "characters", "maps", "flyer", "contacts",
             "settings", "jar",
             "csktcg", "nickrun", "podstack", "flappynick", "match3", "sled", "balloons", "topple"],
     dock:  ["phone", "messages"],                             // left and right of the drawer tab
@@ -301,6 +301,25 @@ window.PHONE_CONTENT = {
     maxChars:  200,
     cooldown:  10,               // seconds between sends on one phone
     readBonus: 50                // CSK TCG Drink Tickets when one of your prompts gets read on stage
+  },
+
+  /* ---------------- OLD TWITTER ----------------
+     One shared timeline for everyone with the phone. Its own Firebase project
+     (separate from the prompt machine). Moderate at old-twitter-admin.html */
+  oldTwitter: {
+    name:           "OLD TWITTER",
+    database:       "https://old-twitter-csk-default-rtdb.firebaseio.com",
+    apiKey:         "AIzaSyDx6P6KzRb8cr-6aBRHF-2ZjuXlpA7RAzo",   // public web key, safe to have here
+    maxChars:       140,
+    cooldown:       30,          // seconds between tweets (the database enforces 30 too)
+    refreshSeconds: 30,          // how often an open timeline checks for new tweets
+    recencyWeight:  2,           // Top timeline: newness counts 2 ...
+    likesWeight:    1,           // ... to stars' 1
+    halfLifeHours:  12,          // how fast tweets sink on the Top timeline
+    reportsToHide:  3,           // this many reports hides a tweet until you check it in the admin page
+    tweetBonus:     10,          // CSK TCG Drink Tickets for the first tweet of the day (0 = off)
+    prompt:         "What are you doing?",
+    blockedWords:   []           // e.g. ["word1", "word2"]: tweets and names with these are refused
   },
 
   /* ---------------- BARKPOD ----------------

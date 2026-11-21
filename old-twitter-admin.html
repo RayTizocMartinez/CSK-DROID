@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Old Twitter Admin</title>
+<style>
+  :root { --bg: #eef6fb; --card: #fff; --ink: #222; --mute: #777; --line: #dde7ee; --blue: #0084b4; --red: #c62828; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4 -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+  header { background: #2fb7ec; color: #fff; padding: 12px 16px; display: flex; align-items: center; gap: 12px; }
+  header h1 { margin: 0; font-size: 20px; font-family: "Arial Rounded MT Bold", Arial, sans-serif; }
+  header .who { margin-left: auto; font-size: 12px; opacity: .9; }
+  main { max-width: 760px; margin: 0 auto; padding: 16px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 16px; margin-bottom: 14px; }
+  label { display: block; font-weight: 600; margin: 8px 0 4px; }
+  input { width: 100%; padding: 9px; border: 1px solid #bbb; border-radius: 5px; font: inherit; }
+  button { font: inherit; border: 1px solid #b9c7d1; background: #fff; border-radius: 5px; padding: 6px 11px; cursor: pointer; }
+  button:hover { background: #f3f8fb; }
+  button.primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+  button.danger { color: var(--red); border-color: #e6b3b3; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .tabs button.on { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .tw { display: flex; gap: 10px; padding: 12px 0; border-top: 1px solid var(--line); }
+  .tw:first-child { border-top: 0; }
+  .tw img { width: 44px; height: 44px; border-radius: 4px; object-fit: cover; background: #8ccfe8; flex: none; }
+  .tw .body { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .tw .meta { color: var(--mute); font-size: 12px; margin: 3px 0 6px; }
+  .tw .btns { display: flex; gap: 6px; flex-wrap: wrap; }
+  .flag { display: inline-block; background: #ffe0e0; color: var(--red); border-radius: 10px; padding: 0 7px; font-size: 12px; font-weight: 600; margin-left: 6px; }
+  .bad { color: var(--red); } .mute { color: var(--mute); }
+  code { background: #f1f4f6; padding: 2px 5px; border-radius: 3px; word-break: break-all; }
+  .row { display: flex; gap: 8px; align-items: center; }
+  #msg { min-height: 20px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<header><h1>old twitter · admin</h1><span class="who" id="who"></span></header>
+<main>
+  <div class="card" id="login">
+    <b>Sign in</b> with the admin login you made in Firebase (Authentication → Users).
+    <form id="f">
+      <label for="em">Email</label><input id="em" type="email" autocomplete="username" required>
+      <label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password" required>
+      <div class="row" style="margin-top:12px"><button class="primary" type="submit">Sign in</button></div>
+    </form>
+    <div id="msg"></div>
+  </div>
+
+  <div id="app" hidden>
+    <div class="tabs">
+      <button data-t="reported" class="on">Reported</button>
+      <button data-t="all">All tweets</button>
+      <button data-t="people">People</button>
+      <button data-t="banned">Banned</button>
+      <button id="refresh">↻ Refresh</button>
+      <button id="out" style="margin-left:auto">Sign out</button>
+    </div>
+    <div class="card" id="list">Loading…</div>
+  </div>
+</main>
+<script>
+(function () {
+  'use strict';
+  var API_KEY = 'AIzaSyDx6P6KzRb8cr-6aBRHF-2ZjuXlpA7RAzo';
+  var DB = 'https://old-twitter-csk-default-rtdb.firebaseio.com/';
+  var $ = function (s) { return document.querySelector(s); };
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var S = null, tab = 'reported', tweets = {}, profiles = {}, banned = {};
+
+  // stays signed in for this browser tab only
+  try { S = JSON.parse(sessionStorage.getItem('otadmin') || 'null'); } catch (e) {}
+  function save() { try { sessionStorage.setItem('otadmin', JSON.stringify(S)); } catch (e) {} }
+  function msg(t, bad) { $('#msg').innerHTML = t; $('#msg').className = bad ? 'bad' : 'mute'; }
+
+  function token() {
+    if (S && S.exp - 60000 > Date.now()) return Promise.resolve(S.idToken);
+    if (!S) return Promise.reject(new Error('signed out'));
+    return fetch('https://securetoken.googleapis.com/v1/token?key=' + API_KEY, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(S.refreshToken) })
+      .then(function (r) { return r.json(); }).then(function (j) {
+        if (!j.id_token) throw new Error('session expired');
+        S.idToken = j.id_token; S.refreshToken = j.refresh_token; S.exp = Date.now() + j.expires_in * 1000; save(); return S.idToken;
+      });
+  }
+  function req(method, path, body) {
+    return token().then(function (t) {
+      return fetch(DB + path + '.json?auth=' + encodeURIComponent(t), { method: method, body: body === undefined ? undefined : JSON.stringify(body) });
+    }).then(function (r) { if (!r.ok) throw new Error('Firebase said ' + r.status + (r.status === 401 ? ' (not allowed)' : '')); return r.json(); });
+  }
+  function get(path) { return fetch(DB + path + '.json', { cache: 'no-store' }).then(function (r) { return r.json(); }); }
+
+  $('#f').onsubmit = function (e) {
+    e.preventDefault(); msg('Signing in…');
+    fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=' + API_KEY, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: $('#em').value.trim(), password: $('#pw').value, returnSecureToken: true })
+    }).then(function (r) { return r.json(); }).then(function (j) {
+      $('#pw').value = '';
+      if (!j.idToken) { msg('That email and password didn\'t work.', true); return; }
+      S = { uid: j.localId, email: j.email, idToken: j.idToken, refreshToken: j.refreshToken, exp: Date.now() + j.expiresIn * 1000 }; save();
+      start();
+    }).catch(function () { msg('Couldn\'t reach Firebase.', true); });
+  };
+  $('#out').onclick = function () { S = null; try { sessionStorage.removeItem('otadmin'); } catch (e) {} location.reload(); };
+  $('#refresh').onclick = function () { load(); };
+  document.querySelectorAll('.tabs [data-t]').forEach(function (b) {
+    b.onclick = function () { tab = b.getAttribute('data-t'); document.querySelectorAll('.tabs [data-t]').forEach(function (x) { x.classList.toggle('on', x === b); }); draw(); };
+  });
+
+  function start() {
+    req('GET', 'admins/' + S.uid).then(function (ok) {
+      if (ok !== true) {
+        msg('Signed in, but this login isn\'t an admin yet. Its user ID is <code>' + esc(S.uid) + '</code>. In Firebase → Realtime Database → Data, add <code>admins / ' + esc(S.uid) + ' : true</code>.', true);
+        return;
+      }
+      $('#login').hidden = true; $('#app').hidden = false; $('#who').textContent = S.email; load();
+    }).catch(function (e) { msg(esc(e.message), true); });
+  }
+
+  function load() {
+    $('#list').textContent = 'Loading…';
+    Promise.all([get('tweets'), get('banned')]).then(function (r) {
+      tweets = r[0] || {}; banned = r[1] || {};
+      var uids = {}; Object.keys(tweets).forEach(function (k) { if (tweets[k].uid) uids[tweets[k].uid] = 1; }); Object.keys(banned).forEach(function (u) { uids[u] = 1; });
+      return get('profiles').then(function (p) { profiles = p || {}; });
+    }).then(draw).catch(function () { $('#list').textContent = 'Couldn\'t load. Refresh to try again.'; });
+  }
+
+  function n(o) { return o ? Object.keys(o).length : 0; }
+  function when(ts) { return ts ? new Date(ts).toLocaleString() : ''; }
+  function pic(uid) { var p = profiles[uid]; return p && p.pic ? p.pic : ''; }
+  function name(t) { var p = profiles[t.uid]; return (p && p.name) || t.name || '?'; }
+
+  function draw() {
+    var L = $('#list'), ids = Object.keys(tweets);
+    if (tab === 'people') {
+      var us = Object.keys(profiles);
+      us.sort(function (a, b) { return (profiles[b].ts || 0) - (profiles[a].ts || 0); });
+      L.innerHTML = us.length ? us.map(function (u) {
+        var p = profiles[u], c = ids.filter(function (k) { return tweets[k].uid === u; }).length;
+        return '<div class="tw"><img src="' + esc(p.pic || '') + '" alt=""><div class="body"><b>' + esc(p.name) + '</b>' + (banned[u] ? '<span class="flag">BANNED</span>' : '') +
+          '<div class="meta">' + c + ' tweets · joined ' + esc(when(p.ts)) + ' · <code>' + esc(u) + '</code></div><div class="btns">' +
+          (banned[u] ? '<button data-a="unban" data-u="' + esc(u) + '">Unban</button>' : '<button class="danger" data-a="ban" data-u="' + esc(u) + '">Ban</button>') +
+          '<button class="danger" data-a="wipe" data-u="' + esc(u) + '">Delete all their tweets</button>' +
+          '<button class="danger" data-a="delprofile" data-u="' + esc(u) + '">Delete profile (name + picture)</button></div></div></div>';
+      }).join('') : '<span class="mute">Nobody has made a profile yet.</span>';
+      return;
+    }
+    if (tab === 'banned') {
+      var b = Object.keys(banned);
+      L.innerHTML = b.length ? b.map(function (u) {
+        var p = profiles[u] || {};
+        return '<div class="tw"><img src="' + esc(p.pic || '') + '" alt=""><div class="body"><b>' + esc(p.name || '(no profile)') + '</b><div class="meta"><code>' + esc(u) + '</code></div>' +
+          '<div class="btns"><button data-a="unban" data-u="' + esc(u) + '">Unban</button></div></div></div>';
+      }).join('') : '<span class="mute">Nobody is banned.</span>';
+      return;
+    }
+    if (tab === 'reported') ids = ids.filter(function (k) { return n(tweets[k].reports) > 0; }).sort(function (a, b) { return n(tweets[b].reports) - n(tweets[a].reports); });
+    else ids.sort(function (a, b) { return (tweets[b].ts || 0) - (tweets[a].ts || 0); });
+    L.innerHTML = ids.length ? ids.map(function (k) {
+      var t = tweets[k], r = n(t.reports);
+      return '<div class="tw"><img src="' + esc(pic(t.uid)) + '" alt=""><div class="body"><b>' + esc(name(t)) + '</b>' + (r ? '<span class="flag">' + r + ' report' + (r > 1 ? 's' : '') + '</span>' : '') + (banned[t.uid] ? '<span class="flag">BANNED</span>' : '') +
+        '<div>' + esc(t.text) + '</div><div class="meta">' + esc(when(t.ts)) + ' · ★ ' + n(t.likes) + '</div><div class="btns">' +
+        '<button class="danger" data-a="del" data-k="' + esc(k) + '">Delete tweet</button>' +
+        (r ? '<button data-a="clear" data-k="' + esc(k) + '">It\'s fine (clear reports)</button>' : '') +
+        (banned[t.uid] ? '' : '<button class="danger" data-a="ban" data-u="' + esc(t.uid) + '">Ban this person</button>') +
+        '</div></div></div>';
+    }).join('') : '<span class="mute">' + (tab === 'reported' ? 'No reported tweets. 🎉' : 'No tweets yet.') + '</span>';
+  }
+
+  $('#list').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-a]'); if (!b) return;
+    var a = b.getAttribute('data-a'), k = b.getAttribute('data-k'), u = b.getAttribute('data-u'), job;
+    if (a === 'del') { if (!confirm('Delete this tweet for everyone?')) return; job = req('DELETE', 'tweets/' + k); }
+    else if (a === 'clear') job = req('DELETE', 'tweets/' + k + '/reports');
+    else if (a === 'ban') { if (!confirm('Ban this person? They won\'t be able to tweet, star, or change their profile, and their tweets are hidden.')) return; job = req('PUT', 'banned/' + u, true); }
+    else if (a === 'unban') job = req('DELETE', 'banned/' + u);
+    else if (a === 'delprofile') { if (!confirm('Delete their name and picture? (Their tweets stay unless you delete those too.)')) return; job = req('DELETE', 'profiles/' + u); }
+    else if (a === 'wipe') {
+      var mine = Object.keys(tweets).filter(function (x) { return tweets[x].uid === u; });
+      if (!mine.length) { alert('They have no tweets.'); return; }
+      if (!confirm('Delete all ' + mine.length + ' of their tweets?')) return;
+      var up = {}; mine.forEach(function (x) { up['tweets/' + x] = null; });
+      job = req('PATCH', '', up);
+    }
+    if (!job) return;
+    b.disabled = true;
+    job.then(load).catch(function (err) { alert(err.message); b.disabled = false; });
+  });
+
+  if (S) start();
+})();
+</script>
+</body>
+</html>
