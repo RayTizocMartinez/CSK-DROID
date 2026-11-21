@@ -24,6 +24,8 @@ Replacement home screen / app drawer icons. Leave this empty to use the built-in
 | Mask Stack | `topple.png` |
 | ClikCok | `clikcok.png` |
 | BARKPOD | `barkpod.png` |
+| CSK TCG | `csktcg.png` |
+| PROMPT MACHINE | `promptmachine.png` |
 
 New apps (games, etc.) will follow the same pattern: their id + `.png`.
 

@@ -185,7 +185,8 @@ window.TCG = {
     sled:       { event: "sled-crash",          field: null,     ticksPer: 200, max: 20, label: "Line Ryder" },  // 1 per 5 seconds ridden
     jar:        { event: "jar-finished",        field: null,     flat: 5,  label: "Nick's Pee" },
     clikcok:    { event: "clikcok-session",     field: null,     msPer: 60000, label: "ClikCok" },     // 1 per minute scrolled
-    barkpod:    { event: "barkpod-listened",    field: null,     flat: 1,  label: "BARKPOD" }          // 1 per 2 minutes listened (5 per 10)
+    barkpod:    { event: "barkpod-listened",    field: null,     flat: 1,  label: "BARKPOD" },         // 1 per 2 minutes listened (5 per 10)
+    promptmachine: { event: "prompt-sent",      field: null,     flat: 0,  label: "PROMPT MACHINE" }   // only the first-prompt-of-the-day bonus, so nobody spams the show's queue for tickets
   }
 
   /* ---------------- fx: the rules the game runs ----------------

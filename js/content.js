@@ -56,6 +56,7 @@
      "game-over:topple"            Mask Stack tower fell (data = { height })
      "clikcok-session"             closed ClikCok (data = milliseconds scrolled)
      "barkpod-feed"                BARKPOD loaded the podcast feed
+     "prompt-sent"                 sent a prompt from PROMPT MACHINE
      "sled-play" / "sled-crash"    Line Ryder started a ride / the rider fell off
      "game-over:match3"            a match-3 run ended
    ===================================================================== */
@@ -280,6 +281,19 @@ window.PHONE_CONTENT = {
       { name: "Super Rocco", model: "super-rocco-1.glb", bio: "" }
       // { name: "Nick", model: "nick.glb", bio: "Fell into a jar once." },
     ]
+  },
+
+  /* ---------------- PROMPT MACHINE ----------------
+     Send prompts to the show's queue from the phone, any day of the week.
+     Uses the same Firebase database as the prompt-machine web page, so the
+     receiver at the show reads these out with everything else. */
+  promptMachine: {
+    name:      "PROMPT MACHINE",
+    database:  "https://prompt-bot-csk-default-rtdb.firebaseio.com",
+    path:      "prompts",
+    maxChars:  200,
+    cooldown:  10,               // seconds between sends on one phone
+    readBonus: 50                // CSK TCG Drink Tickets when one of your prompts gets read on stage
   },
 
   /* ---------------- BARKPOD ----------------
