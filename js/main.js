@@ -186,21 +186,51 @@
     return b;
   }
 
-  /* ---------- home layout (4x4 grid, saved per visitor) ---------- */
-  var COLS = 4, ROWS = 4, SLOTS = COLS * ROWS;
-  function defaultLayout() {
-    var l = [];
-    for (var i = 0; i < SLOTS; i++) l.push(null);
-    ((C.home || {}).icons || []).forEach(function (id, i) { if (i < SLOTS) l[i] = id || null; });
-    return l;
+  /* ---------- home pages (saved per visitor) ----------
+     Every page has the countdown on top and a 4x4 grid. Page 1 is laid out from content.js -> home.icons.
+     Every other app fills pages 2, 3... on its own, so a new app always
+     lands on a home screen. Swipe sideways between pages; the dots show where you are. */
+  var COLS = 4, ROWS = 4, SLOTS = COLS * ROWS, ROWS_N = 4;   // every page: countdown + 4x4
+  function pageSize(p) { return p === 0 ? SLOTS : COLS * ROWS_N; }
+  function blank(p) { var a = []; for (var i = 0; i < pageSize(p); i++) a.push(null); return a; }
+  function dockIds() { return ((C.home || {}).dock || []).filter(Boolean); }
+  function removed() { return OS.store.get('homeRemoved', []); }
+  function setRemoved(a) { OS.store.set('homeRemoved', a); }
+  // content.js -> home.icons runs across the pages in order (16 per page)
+  function defaultPages() {
+    var ic = (C.home || {}).icons || [], pages = [];
+    for (var p = 0; p * SLOTS < Math.max(ic.length, 1); p++) { var pg = blank(p); for (var i = 0; i < SLOTS; i++) pg[i] = ic[p * SLOTS + i] || null; pages.push(pg); }
+    return pages;
   }
-  function getLayout() {
-    var l = OS.store.get('homeLayout', null);
-    if (!l || l.length !== SLOTS) l = defaultLayout();
-    return l.map(function (id) { return id && OS.apps[id] ? id : null; });
+  function getPages() {
+    var pages = OS.store.get('homePages', null);
+    if (!pages || !pages.length) {
+      var old = OS.store.get('homeLayout', null);                       // layouts saved before pages existed
+      pages = old && old.length === SLOTS ? [old] : defaultPages();
+    }
+    pages = pages.map(function (pg, p) {
+      var a = blank(p);
+      (pg || []).forEach(function (id, i) { if (i < a.length && id && OS.apps[id] && !OS.apps[id].hidden) a[i] = id; });
+      return a;
+    });
+    // any app that isn't on a page, in the dock, or removed on purpose gets the next free spot after page 1
+    var seen = {}, gone = removed(), changed = false;
+    pages.forEach(function (pg) { pg.forEach(function (id) { if (id) { if (seen[id]) changed = true; seen[id] = 1; } }); });
+    if (changed) pages = pages.map(function (pg) { var s2 = {}; return pg.map(function (id) { if (!id || s2[id]) return null; s2[id] = 1; return id; }); });
+    dockIds().forEach(function (id) { seen[id] = 1; });
+    OS.appList().forEach(function (a) {
+      if (seen[a.id] || gone.indexOf(a.id) >= 0) return;
+      seen[a.id] = 1; changed = true;
+      for (var p = 1; p < pages.length; p++) { var k = pages[p].indexOf(null); if (k >= 0) { pages[p][k] = a.id; return; } }
+      var np = blank(pages.length); np[0] = a.id; pages.push(np);
+    });
+    while (pages.length > 1 && pages[pages.length - 1].every(function (x) { return !x; })) { pages.pop(); changed = true; }
+    if (changed) savePages(pages);
+    return pages;
   }
-  function saveLayout(l) { OS.store.set('homeLayout', l); }
-  OS.resetHome = function () { OS.store.set('homeLayout', null); buildHome(); OS.toast('Home screen reset'); };
+  function savePages(pages) { OS.store.set('homePages', pages); }
+  OS.resetHome = function () { OS.store.set('homePages', null); OS.store.set('homeLayout', null); setRemoved([]); curPage = 0; buildHome(); OS.toast('Home screen reset'); };
+  var curPage = 0;
 
   /* ---------- long-press to pick up an icon ---------- */
   var HOLD_MS = 450, drag = null;
@@ -243,6 +273,7 @@
     window.addEventListener('pointercancel', onDragCancel);
   }
   function onDragMove(e) { e.preventDefault(); moveDrag(e.clientX, e.clientY); }
+  var flipT = null;
   function moveDrag(x, y) {
     drag.ghost.style.left = x + 'px';
     drag.ghost.style.top = y + 'px';
@@ -253,8 +284,19 @@
       drag.target = tgt;
       if (tgt) tgt.classList.add('over');
     }
+    // hold an icon at the left/right edge to flip pages
+    var r = $('#home').getBoundingClientRect(), edge = 22 * (OS.scale || 1), dir = x < r.left + edge ? -1 : x > r.right - edge ? 1 : 0;
+    if (!dir) { clearTimeout(flipT); flipT = null; drag.flipDir = 0; return; }
+    if (drag.flipDir === dir && flipT) return;
+    drag.flipDir = dir; clearTimeout(flipT);
+    flipT = setTimeout(function () {
+      flipT = null; if (!drag) return;
+      var n = $('#home').querySelectorAll('.home-page').length;
+      if (curPage + dir >= 0 && curPage + dir < n) { goPage(curPage + dir); drag.flipDir = 0; }
+    }, 650);
   }
   function endDragUI() {
+    clearTimeout(flipT); flipT = null;
     window.removeEventListener('pointermove', onDragMove);
     window.removeEventListener('pointerup', onDragEnd);
     window.removeEventListener('pointercancel', onDragCancel);
@@ -266,29 +308,36 @@
   function onDragCancel() { endDragUI(); drag = null; }
   function onDragEnd() {
     var d = drag; endDragUI(); drag = null;
-    var tgt = d.target, l = getLayout();
+    var tgt = d.target, pages = getPages();
     if (!tgt) return;
+    var app = d.src.app;
     if (tgt.classList.contains('trash')) {
-      if (d.src.from === 'home') { l[d.src.index] = null; saveLayout(l); buildHome(); OS.toast(OS.apps[d.src.app].name + ' removed from Home'); }
+      if (d.src.from === 'home') {
+        pages[d.src.page][d.src.index] = null;
+        var g = removed(); if (g.indexOf(app) < 0) g.push(app); setRemoved(g);
+        savePages(pages); buildHome(); OS.toast(OS.apps[app].name + ' removed from Home');
+      }
       return;
     }
-    var j = +tgt.getAttribute('data-i');
+    var p = +tgt.getAttribute('data-p'), j = +tgt.getAttribute('data-i');
+    setRemoved(removed().filter(function (x) { return x !== app; }));
     if (d.src.from === 'home') {
-      var i = d.src.index;
-      if (i === j) return;
-      var tmp = l[j]; l[j] = l[i]; l[i] = tmp;               // swap with whatever was there
+      var sp = d.src.page, i = d.src.index;
+      if (sp === p && i === j) return;
+      var tmp = pages[p][j]; pages[p][j] = pages[sp][i]; pages[sp][i] = tmp;   // swap with whatever was there
     } else {
-      var k = l.indexOf(d.src.app);
-      if (k === j) return;
-      if (k >= 0) { l[k] = l[j]; l[j] = d.src.app; }          // already on home: move it
-      else if (l[j] === null) l[j] = d.src.app;
+      var at = null;
+      pages.forEach(function (pg, pi) { var k = pg.indexOf(app); if (k >= 0) at = { p: pi, i: k }; });
+      if (at && at.p === p && at.i === j) return;
+      if (at) { pages[at.p][at.i] = pages[p][j]; pages[p][j] = app; }        // already on home: move it
+      else if (pages[p][j] === null) pages[p][j] = app;
       else {
-        var free = l.indexOf(null);
-        if (free < 0) { OS.toast('No more room on this Home screen.'); return; }
-        l[free] = l[j]; l[j] = d.src.app;                    // bump the old icon to a free spot
+        var bumped = pages[p][j]; pages[p][j] = app; var placed = false;       // the old icon moves to the next free spot
+        for (var q = 0; q < pages.length && !placed; q++) { var f = pages[q].indexOf(null); if (f >= 0) { pages[q][f] = bumped; placed = true; } }
+        if (!placed) { var np = blank(pages.length); np[0] = bumped; pages.push(np); }
       }
     }
-    saveLayout(l); buildHome();
+    savePages(pages); buildHome();
     OS.emit('home-rearranged');
   }
   // stop the browser's long-press menu from popping up over the phone
@@ -346,14 +395,17 @@
   }
   function pad(n) { return ('0' + n).slice(-2); }
   function tickCountdown() {
-    var el = document.querySelector('.w-count');
-    if (!el) return;
-    var ns = OS.nextShow();
-    el.classList.toggle('live', !!(ns && ns.live));
-    if (!ns || ns.live) return;
-    var t = Math.max(0, Math.floor((ns.start - Date.now()) / 1000));
-    var v = { d: Math.floor(t / 86400), h: pad(Math.floor(t / 3600) % 24), m: pad(Math.floor(t / 60) % 60), s: pad(t % 60) };
-    Object.keys(v).forEach(function (k) { var b = el.querySelector('[data-u="' + k + '"]'); if (b.textContent != v[k]) b.textContent = v[k]; });
+    var els = document.querySelectorAll('.w-count');     // one on every home page
+    if (!els.length) return;
+    var ns = OS.nextShow(), v = null;
+    if (ns && !ns.live) {
+      var t = Math.max(0, Math.floor((ns.start - Date.now()) / 1000));
+      v = { d: Math.floor(t / 86400), h: pad(Math.floor(t / 3600) % 24), m: pad(Math.floor(t / 60) % 60), s: pad(t % 60) };
+    }
+    Array.prototype.forEach.call(els, function (el) {
+      el.classList.toggle('live', !!(ns && ns.live));
+      if (v) Object.keys(v).forEach(function (k) { var b = el.querySelector('[data-u="' + k + '"]'); if (b && b.textContent != v[k]) b.textContent = v[k]; });
+    });
   }
   OS.countdownText = function () {               // e.g. "2d 04h 13m" for other apps to reuse
     var ns = OS.nextShow();
@@ -366,43 +418,62 @@
   function buildHome() {
     var H = $('#home');
     H.innerHTML = '';
-    var w = OS.el('div', 'home-widgets');
-    var s = C.show || {};
-    var cell = function (u, label) { return '<div class="wc-cell"><b data-u="' + u + '">--</b><small>' + label + '</small></div>'; };
-    var sw = OS.el('button', 'w-count',
-      '<div class="wc-head"><span class="wc-name">' + OS.esc(s.name || '') + '</span><span class="wc-tag">NEXT SHOW</span></div>' +
-      '<div class="wc-digits">' + cell('d', 'DAYS') + '<i>:</i>' + cell('h', 'HRS') + '<i>:</i>' + cell('m', 'MIN') + '<i>:</i>' + cell('s', 'SEC') + '</div>' +
-      '<div class="wc-live">' + OS.esc(s.liveText || 'LIVE NOW') + '</div>' +
-      '<div class="wc-foot"><b>' + OS.esc(showWhenText()) + '</b><span>' + OS.esc(s.venue || '') + '</span></div>');
-    sw.onclick = function () {
-      var ns = OS.nextShow(), text = (s.venue || '') + '\nEvery ' + ((s.weekly || {}).weekday || '') + ' · ' + showWhenText().replace(/^\S+ /, '');
-      if (ns && !ns.live) {
-        var local = new Date(ns.start);
-        text += '\n\nNext show: ' + local.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' }) +
-          ', ' + OS.fmtTime(local) + ' your time\n(' + OS.countdownText() + ' from now)';
-      } else if (ns) text += '\n\nThe show is on right now.';
-      var btns = [{ label: 'OK' }];
-      if (s.ticketsUrl) btns.unshift({ label: 'Tickets', action: function () { window.open(s.ticketsUrl, '_blank', 'noopener'); } });
-      OS.dialog({ title: s.name, text: text, buttons: btns });
-      OS.emit('countdown-tapped');
-    };
-    w.appendChild(sw);
-    H.appendChild(w);
-
-    var grid = OS.el('div', 'home-grid');
-    grid.style.gridTemplateColumns = 'repeat(' + COLS + ', 1fr)';
-    grid.style.gridTemplateRows = 'repeat(' + ROWS + ', minmax(0, 1fr))';
-    getLayout().forEach(function (id, i) {
-      var slot = OS.el('div', 'slot');
-      slot.setAttribute('data-i', i);
-      if (id) {
-        var b = iconButton(OS.apps[id]);
-        holdable(b, { from: 'home', index: i, app: id });
-        slot.appendChild(b);
+    var pages = getPages();
+    if (curPage >= pages.length) curPage = pages.length - 1;
+    var pager = OS.el('div', 'home-pager'), track = OS.el('div', 'home-track');
+    track.style.width = (pages.length * 100) + '%';
+    pages.forEach(function (pg, p) {
+      var page = OS.el('div', 'home-page' + (p === 0 ? ' first' : ''));
+      page.style.width = (100 / pages.length) + '%';
+      {
+      var w = OS.el('div', 'home-widgets');
+      var s = C.show || {};
+      var cell = function (u, label) { return '<div class="wc-cell"><b data-u="' + u + '">--</b><small>' + label + '</small></div>'; };
+      var sw = OS.el('button', 'w-count',
+        '<div class="wc-head"><span class="wc-name">' + OS.esc(s.name || '') + '</span><span class="wc-tag">NEXT SHOW</span></div>' +
+        '<div class="wc-digits">' + cell('d', 'DAYS') + '<i>:</i>' + cell('h', 'HRS') + '<i>:</i>' + cell('m', 'MIN') + '<i>:</i>' + cell('s', 'SEC') + '</div>' +
+        '<div class="wc-live">' + OS.esc(s.liveText || 'LIVE NOW') + '</div>' +
+        '<div class="wc-foot"><b>' + OS.esc(showWhenText()) + '</b><span>' + OS.esc(s.venue || '') + '</span></div>');
+      sw.onclick = function () {
+        var ns = OS.nextShow(), text = (s.venue || '') + '\nEvery ' + ((s.weekly || {}).weekday || '') + ' · ' + showWhenText().replace(/^\S+ /, '');
+        if (ns && !ns.live) {
+          var local = new Date(ns.start);
+          text += '\n\nNext show: ' + local.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' }) +
+            ', ' + OS.fmtTime(local) + ' your time\n(' + OS.countdownText() + ' from now)';
+        } else if (ns) text += '\n\nThe show is on right now.';
+        var btns = [{ label: 'OK' }];
+        if (s.ticketsUrl) btns.unshift({ label: 'Tickets', action: function () { window.open(s.ticketsUrl, '_blank', 'noopener'); } });
+        OS.dialog({ title: s.name, text: text, buttons: btns });
+        OS.emit('countdown-tapped');
+      };
+      w.appendChild(sw);
+        page.appendChild(w);
       }
-      grid.appendChild(slot);
+      var grid = OS.el('div', 'home-grid');
+      var rows = p === 0 ? ROWS : ROWS_N;
+      grid.style.gridTemplateColumns = 'repeat(' + COLS + ', 1fr)';
+      grid.style.gridTemplateRows = 'repeat(' + rows + ', minmax(0, 1fr))';
+      pg.forEach(function (id, i) {
+        var slot = OS.el('div', 'slot');
+        slot.setAttribute('data-p', p); slot.setAttribute('data-i', i);
+        if (id) {
+          var b = iconButton(OS.apps[id]);
+          holdable(b, { from: 'home', page: p, index: i, app: id });
+          slot.appendChild(b);
+        }
+        grid.appendChild(slot);
+      });
+      page.appendChild(grid);
+      track.appendChild(page);
     });
-    H.appendChild(grid);
+    pager.appendChild(track);
+    H.appendChild(pager);
+    var dotsEl = OS.el('div', 'home-dots' + (pages.length > 1 ? '' : ' single'));
+    pages.forEach(function (_, p) { var dt = OS.el('button', 'hd' + (p === curPage ? ' on' : '')); dt.setAttribute('aria-label', 'Home page ' + (p + 1)); dt.onclick = function () { goPage(p); }; dotsEl.appendChild(dt); });
+    H.appendChild(dotsEl);
+    if (pages.length > 1 && !OS.store.get('homeSwiped', false)) H.appendChild(OS.el('div', 'home-hint', '<span>swipe for more</span>&#8250;'));
+    setPage(curPage, false);
+    swipeable(pager, track, pages.length);
 
     var dock = OS.el('div', 'dock');
     var d = (C.home || {}).dock || [];
@@ -416,6 +487,58 @@
     H.appendChild(dock);
     tickCountdown();
   }
+  function setPage(p, animate) {
+    var track = document.querySelector('#home .home-track'); if (!track) return;
+    var n = track.children.length; curPage = Math.max(0, Math.min(n - 1, p));
+    track.style.transition = animate ? 'transform .28s cubic-bezier(.2,.8,.3,1)' : 'none';
+    track.style.transform = 'translateX(' + (-curPage * 100 / n) + '%)';
+    Array.prototype.forEach.call(document.querySelectorAll('#home .home-dots .hd'), function (d, i) { d.classList.toggle('on', i === curPage); });
+  }
+  function goPage(p) {
+    setPage(p, true);
+    if (curPage > 0 && !OS.store.get('homeSwiped', false)) { OS.store.set('homeSwiped', true); var h = document.querySelector('#home .home-hint'); if (h) h.remove(); }
+    OS.emit('home-page', curPage);
+  }
+  OS.homePage = function (p) { if (p == null) return curPage; goPage(p); };
+  // swipe sideways between pages (taps and long-presses on icons still work)
+  function swipeable(pager, track, n) {
+    if (n < 2) return;
+    var st = null;
+    pager.addEventListener('pointerdown', function (e) {
+      if (drag || (e.button && e.button !== 0)) return;
+      st = { x: e.clientX, y: e.clientY, t: Date.now(), on: false, id: e.pointerId };
+    });
+    pager.addEventListener('pointermove', function (e) {
+      if (!st || drag || e.pointerId !== st.id) return;
+      var dx = e.clientX - st.x, dy = e.clientY - st.y;
+      if (!st.on) { if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy)) { st.on = true; try { pager.setPointerCapture(e.pointerId); } catch (er) {} } else return; }
+      var w = pager.getBoundingClientRect().width, frac = dx / w;
+      if ((curPage === 0 && frac > 0) || (curPage === n - 1 && frac < 0)) frac *= 0.3;   // rubber band at the ends
+      track.style.transition = 'none';
+      track.style.transform = 'translateX(' + ((-curPage + frac) * 100 / n) + '%)';
+    });
+    function end(e) {
+      if (!st || e.pointerId !== st.id) return;
+      var s0 = st; st = null;
+      if (!s0.on) return;
+      pager._swiped = Date.now();
+      var dx = e.clientX - s0.x, w = pager.getBoundingClientRect().width, fast = Math.abs(dx) / Math.max(1, Date.now() - s0.t) > 0.45;
+      if (dx < -w * 0.2 || (fast && dx < -30)) goPage(curPage + 1);
+      else if (dx > w * 0.2 || (fast && dx > 30)) goPage(curPage - 1);
+      else setPage(curPage, true);
+    }
+    pager.addEventListener('pointerup', end);
+    pager.addEventListener('pointercancel', function (e) { if (st && e.pointerId === st.id) { st = null; setPage(curPage, true); } });
+    // a swipe that ends on an icon shouldn't open it
+    pager.addEventListener('click', function (e) { if (pager._swiped && Date.now() - pager._swiped < 300) { e.stopPropagation(); e.preventDefault(); } }, true);
+  }
+  // Home button on the home screen goes back to page 1; arrow keys flip pages on a computer
+  var _home = OS.home;
+  OS.home = function () { var already = !OS.current(); _home.apply(this, arguments); if (already) goPage(0); };
+  window.addEventListener('keydown', function (e) {
+    if (OS.state !== 'on' || OS.current() || (e.target && /input|textarea/i.test(e.target.tagName))) return;
+    if (e.key === 'ArrowRight') goPage(curPage + 1); else if (e.key === 'ArrowLeft') goPage(curPage - 1);
+  });
   function dots() {
     var o = '';
     for (var y = 0; y < 3; y++) for (var x = 0; x < 3; x++) o += '<rect x="' + (5 + x * 5.5) + '" y="' + (5 + y * 5.5) + '" width="3" height="3" fill="#fff"/>';

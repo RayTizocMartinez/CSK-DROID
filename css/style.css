@@ -205,9 +205,21 @@ body.fullscreen #navbar { height: 46px; margin-top: 0; padding: 4px; gap: 4px; b
 .wc-foot b { color: #ffb02e; }
 .wc-foot span { color: #cfcfcf; }
 .drawer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px 0; padding: 14px 4px; }
-#home { display: flex; flex-direction: column; padding-bottom: 74px; }
+#home { display: flex; flex-direction: column; padding-bottom: 86px; }
 .home-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, minmax(0, 1fr)); padding: 4px; }
 .slot { display: flex; align-items: center; justify-content: center; border-radius: 8px; min-height: 0; }
+/* home pages: swipe sideways, dots above the dock */
+.home-pager { flex: 1; min-height: 0; overflow: hidden; position: relative; touch-action: pan-y; }
+.home-track { display: flex; height: 100%; will-change: transform; }
+.home-page { height: 100%; display: flex; flex-direction: column; min-width: 0; }
+.home-dots { position: absolute; left: 0; right: 0; bottom: 76px; height: 10px; display: flex; justify-content: center; align-items: center; gap: 7px; pointer-events: none; }
+.home-dots.single { display: none; }
+.home-dots .hd { pointer-events: auto; width: 7px; height: 7px; padding: 0; border-radius: 50%; border: 0; background: rgba(255, 255, 255, .35); box-shadow: 0 0 3px #000; transition: background .2s, transform .2s; }
+.home-dots .hd.on { background: #ffb02e; transform: scale(1.3); }
+.home-dots .hd::after { content: ''; position: absolute; margin: -9px; width: 25px; height: 25px; }
+.home-hint { position: absolute; right: 10px; bottom: 73px; display: flex; align-items: center; gap: 3px; font-size: 18px; line-height: 1; color: #fff; text-shadow: 0 0 5px #000; pointer-events: none; animation: hint-nudge 1.6s ease-in-out infinite; }
+.home-hint span { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; opacity: .85; }
+@keyframes hint-nudge { 50% { transform: translateX(-6px); } }
 .slot .icon-wrap { touch-action: none; }
 #home.editing .slot { outline: 1px dashed rgba(255, 255, 255, .18); outline-offset: -4px; }
 #home.editing .slot.over { background: rgba(255, 176, 46, .28); outline-color: #ffb02e; }

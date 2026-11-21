@@ -121,12 +121,16 @@ window.PHONE_CONTENT = {
   },
 
   /* ---------------- HOME SCREEN ----------------
-     icons: the STARTING layout of the 4x4 home grid, left-to-right,
-     top-to-bottom. Use null for an empty spot. Visitors can long-press
+     icons: the STARTING layout of the home pages, left-to-right,
+     top-to-bottom, 16 apps per page. Use null for an empty spot. Visitors can long-press
      icons to move them, so this only applies until they rearrange
      (or do a factory reset). */
   home: {
-    icons: ["barkpod", "gallery", "contacts", "settings", "podstack", "flappynick", "match3", "flyer", "jar", "maps", "characters", "nickrun", "sled", "balloons", "topple", "clikcok"],
+    // In order across the home pages: the first 16 are page 1, the next 16 page 2, and so on.
+    // Apps left out of this list get added after these on their own. null = an empty spot.
+    icons: ["promptmachine", "barkpod", "gallery", "clikcok", "characters", "maps", "flyer", "contacts",
+            "settings", "jar",
+            "csktcg", "nickrun", "podstack", "flappynick", "match3", "sled", "balloons", "topple"],
     dock:  ["phone", "messages"],                             // left and right of the drawer tab
     // extra pictures for the Wallpapers picker (long-press the home screen).
     // Anything named wallpaper-1.jpg, background-1.jpg ... in media/wallpaper
