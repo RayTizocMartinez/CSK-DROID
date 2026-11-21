@@ -2,7 +2,7 @@
    Visitors always get your newest upload when online, and the phone
    still opens offline with whatever they've already seen.
    You do NOT need to edit this when you add media. */
-var CACHE = 'eclair-phone-v32';
+var CACHE = 'eclair-phone-v33';
 var SHELL = [
   './', './index.html', './manifest.json', './css/style.css',
   './js/content.js', './js/gallery-index.js', './js/os.js', './js/main.js',
@@ -21,7 +21,9 @@ self.addEventListener('fetch', function (e) {
   var r = e.request;
   if (r.method !== 'GET' || new URL(r.url).origin !== location.origin) return;
   if (r.headers.get('range')) return;              // audio/video streaming: let the browser handle it
-  e.respondWith(fetch(r).then(function (res) {
+  // always ask GitHub if the file changed (it answers "no change" fast), so a new upload shows up right away
+  // instead of waiting out the browser's 10-minute cache
+  e.respondWith(fetch(r.url, { cache: 'no-cache', credentials: 'same-origin' }).then(function (res) {
     if (res.ok && res.status === 200 && res.type === 'basic') {
       var copy = res.clone();
       caches.open(CACHE).then(function (c) { c.put(r, copy); });

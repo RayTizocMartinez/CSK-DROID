@@ -85,6 +85,8 @@
             // drop the offline cache + nudge the service worker so the newest upload loads
             if (window.caches) jobs.push(caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }));
             if (navigator.serviceWorker) jobs.push(navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.map(function (r) { return r.update().catch(function () {}); })); }));
+            // re-download the main files past the browser's own cache, then restart
+            jobs.push(Promise.all(['index.html', 'sw.js', 'css/style.css', 'js/content.js', 'js/main.js', 'js/os.js'].map(function (f) { return fetch(f, { cache: 'reload' }).catch(function () {}); })));
             Promise.all(jobs).catch(function () {}).then(function () { setTimeout(function () { location.reload(); }, 800); });
           } }, { label: 'Later' }] });
       }
