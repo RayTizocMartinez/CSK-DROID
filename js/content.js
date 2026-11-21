@@ -283,7 +283,9 @@ window.PHONE_CONTENT = {
     list: [
       { name: "Mega Nick", model: "mega-nick-1.glb", bio: "", price: 100 },
       { name: "Rodichu", model: "rodichu-1.glb", bio: "", price: 10000000 },
-      { name: "Super Rocco", model: "super-rocco-1.glb", bio: "", price: 100 }
+      { name: "Super Rocco", model: "super-rocco-1.glb", bio: "", price: 100 },
+      { name: "CSK Bitch", model: "csk-bitch-1.glb", bio: "", price: 500 },
+      { name: "Sad Ray", model: "sad-ray-1.glb", bio: "", price: 500 }
       // { name: "Nick", model: "nick.glb", bio: "Fell into a jar once." },
     ]
   },
