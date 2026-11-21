@@ -11,6 +11,15 @@
 
 That's it. Order in the list = order on the shelf. `sample.glb` is a stand-in figure, so delete it and its line when you add real ones.
 
+## Prices (Drink Tickets)
+
+Killmiibos are unlocked with Drink Tickets, the currency every app on the phone pays out (games, ClikCok, BARKPOD, PROMPT MACHINE, the card game). Ones you don't own spin on the shelf as black silhouettes with a price tag.
+
+- `price: 200` under `characters` in `js/content.js` sets the price for all of them.
+- Give one its own price: `{ name: "Nick", model: "nick.glb", bio: "...", price: 500 }`
+- `price: 0` makes it free.
+- To give one away from a dial code or reward: `{ type: "killmiibo", model: "nick.glb" }`
+
 ## File names
 
 Anything works as long as the line matches exactly. Lowercase with dashes is safest (`nick-martin.glb`), because capitals matter on GitHub.

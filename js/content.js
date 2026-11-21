@@ -279,10 +279,11 @@ window.PHONE_CONTENT = {
      Order here = order on the shelf. */
   characters: {
     name: "Killmiibos",
+    price: 200,                 // Drink Tickets to unlock one (give any one its own price:, or price: 0 for free)
     list: [
-      { name: "Mega Nick", model: "mega-nick-1.glb", bio: "" },
-      { name: "Rodichu", model: "rodichu-1.glb", bio: "" },
-      { name: "Super Rocco", model: "super-rocco-1.glb", bio: "" }
+      { name: "Mega Nick", model: "mega-nick-1.glb", bio: "", price: 100 },
+      { name: "Rodichu", model: "rodichu-1.glb", bio: "", price: 10000000 },
+      { name: "Super Rocco", model: "super-rocco-1.glb", bio: "", price: 100 }
       // { name: "Nick", model: "nick.glb", bio: "Fell into a jar once." },
     ]
   },

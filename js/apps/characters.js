@@ -13,6 +13,20 @@
   var DIR = 'media/characters/';
 
   function list() { return (CFG.list || []).filter(function (c) { return c && c.model; }); }
+
+  /* ---------- buying with Drink Tickets (the phone-wide currency from js/tcg-core.js) ---------- */
+  var T = OS.tcg;
+  function price(c) { return c.price != null ? c.price : (CFG.price != null ? CFG.price : 200); }
+  function ownedList() { return OS.store.get('chr:owned', []); }
+  function owns(c) { return !T || price(c) <= 0 || ownedList().indexOf(c.model) >= 0; }
+  function unlock(c) { var o = ownedList(); if (o.indexOf(c.model) < 0) { o.push(c.model); OS.store.set('chr:owned', o); } }
+  OS.actions = OS.actions || {};
+  // give one away from a dial code / reward: { type: "killmiibo", model: "rodichu-1.glb" }
+  OS.actions.killmiibo = function (a) {
+    var c = list().filter(function (x) { return x.model === a.model || x.name === a.name; })[0];
+    if (c) { unlock(c); OS.toast('New Killmiibo: ' + c.name); OS.emit('killmiibo-unlocked', c.name); }
+  };
+  var TK = '<svg viewBox="0 0 24 24" class="chr-tk"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4z" fill="#f2b01e"/><path d="M9 5v14" stroke="#7a5200" stroke-dasharray="1.6 1.6"/></svg>';
   function src(c) { return OS.url(c.model.indexOf('/') >= 0 ? c.model : DIR + c.model); }
 
   var mvPromise = null;
@@ -62,21 +76,41 @@
       var detail = null, ok = false;
 
       function render() {
+        var cs = list(), have = cs.filter(owns).length;
         root.innerHTML = OS.titleBar(CFG.name || 'Characters');
+        if (T) root.appendChild(OS.el('div', 'chr-bar', '<span>' + have + ' / ' + cs.length + ' collected</span><b>' + TK + ' <i>' + T.tickets() + '</i></b>'));
         var grid = OS.el('div', 'chr-grid scroll');
-        var cs = list();
         if (!cs.length) grid.innerHTML = '<div class="empty" style="grid-column:1/-1">No characters yet.</div>';
         cs.forEach(function (c) {
-          var card = OS.el('button', 'chr-card');
+          var mine = owns(c);
+          var card = OS.el('button', 'chr-card' + (mine ? '' : ' locked'));
           card.appendChild(ok ? viewer(c, false) : OS.el('div', 'chr-model', FLAT));
-          card.appendChild(OS.el('div', 'chr-name', OS.esc(c.name || '')));
-          card.onclick = function () { open(c); };
+          card.appendChild(OS.el('div', 'chr-name', mine ? OS.esc(c.name || '') : '???'));
+          if (!mine) card.appendChild(OS.el('div', 'chr-price', TK + ' ' + price(c).toLocaleString()));
+          card.onclick = function () { if (mine) open(c); else buy(c); };
           grid.appendChild(card);
         });
         root.appendChild(grid);
+        if (T && have < cs.length) root.appendChild(OS.el('div', 'chr-earn', 'Earn Drink Tickets by playing anything on the phone.'));
       }
-      function open(c) {
-        detail = OS.el('div', 'chr-detail', '<div class="chr-stage"></div><div class="chr-info"><b>' + OS.esc(c.name || '') + '</b>' +
+      function buy(c) {
+        var cost = price(c), bal = T.tickets();
+        if (bal < cost) {
+          OS.dialog({ title: 'Not enough Drink Tickets', text: 'This Killmiibo costs ' + cost.toLocaleString() + '. You have ' + bal.toLocaleString() + '.\n\nEvery game on the phone pays Drink Tickets. So do ClikCok, BARKPOD and PROMPT MACHINE. The first play of each game every day pays extra, and show day pays double.', buttons: [{ label: 'OK' }] });
+          return;
+        }
+        OS.dialog({ title: 'Unlock a Killmiibo?', text: 'Spend ' + cost.toLocaleString() + ' Drink Tickets to find out who this is?\nYou have ' + bal.toLocaleString() + '.', buttons: [
+          { label: 'Buy', action: function () {
+            if (!T.spend(cost)) return;
+            unlock(c); OS.beep(660, 0.06); OS.beep(990, 0.1, 0.07);
+            OS.emit('killmiibo-unlocked', c.name);
+            render(); open(c, true);
+          } },
+          { label: 'Not now' }
+        ] });
+      }
+      function open(c, fresh) {
+        detail = OS.el('div', 'chr-detail' + (fresh ? ' fresh' : ''), '<div class="chr-stage"></div><div class="chr-info">' + (fresh ? '<em>UNLOCKED!</em>' : '') + '<b>' + OS.esc(c.name || '') + '</b>' +
           (c.bio ? '<p>' + OS.esc(c.bio) + '</p>' : '') + '<div class="chr-hint">drag to spin · pinch to zoom</div></div>');
         detail.querySelector('.chr-stage').appendChild(ok ? viewer(c, true) : OS.el('div', 'chr-model', FLAT));
         root.appendChild(detail);

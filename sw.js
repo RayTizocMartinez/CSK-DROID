@@ -2,7 +2,7 @@
    Visitors always get your newest upload when online, and the phone
    still opens offline with whatever they've already seen.
    You do NOT need to edit this when you add media. */
-var CACHE = 'eclair-phone-v31';
+var CACHE = 'eclair-phone-v32';
 var SHELL = [
   './', './index.html', './manifest.json', './css/style.css',
   './js/content.js', './js/gallery-index.js', './js/os.js', './js/main.js',
