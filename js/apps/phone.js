@@ -12,6 +12,42 @@
     '<rect x="4" y="11" width="5" height="4" rx="1" fill="#ddd"/><rect x="4" y="22" width="5" height="4" rx="1" fill="#ddd"/><rect x="4" y="33" width="5" height="4" rx="1" fill="#ddd"/>' +
     '<circle cx="25" cy="19" r="6" fill="#fff"/><path d="M14 36c0-6 5-9 11-9s11 3 11 9z" fill="#fff"/></svg>';
 
+  /* ---------- voicemails: one file, or several that take turns ----------
+     media/voicemail/<id>.mp3                       one voicemail
+     media/voicemail/<id>-1.mp3, <id>-2.mp3 ...     several: each call plays a different one
+     voicemails: ["path", "path"] in content.js       or list them by hand                       */
+  var vmFound = {}, vmScan = null;
+  function headOk(u) { return fetch(OS.url(u), { method: 'HEAD', cache: 'no-store' }).then(function (r) { return r.ok; }).catch(function () { return false; }); }
+  function scanVoicemails() {
+    if (vmScan) return vmScan;
+    vmScan = Promise.all((C.contacts || []).map(function (c) {
+      if (c.voicemails && c.voicemails.length) { vmFound[c.id] = c.voicemails.slice(); return; }
+      var list = [];
+      function next(n) {
+        var u = 'media/voicemail/' + c.id + '-' + n + '.mp3';
+        return headOk(u).then(function (ok) { if (ok) { list.push(u); if (n < 30) return next(n + 1); } });
+      }
+      return next(1).then(function () { if (list.length) vmFound[c.id] = list; });
+    }));
+    return vmScan;
+  }
+  OS.on('unlocked', function () { setTimeout(scanVoicemails, 3000); });
+  // pick the next one: goes through all of them in a shuffled order before any repeats
+  function voicemailFor(c) {
+    var list = vmFound[c.id];
+    if (!list || !list.length) return c.voicemail || ('media/voicemail/' + c.id + '.mp3');
+    if (list.length === 1) return list[0];
+    var key = 'vmbag:' + c.id, bag = OS.store.get(key, []).filter(function (u) { return list.indexOf(u) >= 0; }), last = OS.store.get(key + ':last', null);
+    if (!bag.length) {
+      bag = list.slice();
+      for (var i = bag.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = bag[i]; bag[i] = bag[j]; bag[j] = t; }
+      if (bag[bag.length - 1] === last) bag.unshift(bag.pop());
+    }
+    var pick = bag.pop();
+    OS.store.set(key, bag); OS.store.set(key + ':last', pick);
+    return pick;
+  }
+
   /* ---------- call log storage ---------- */
   function userCalls() { return OS.store.get('calls', []); }
   function addCall(entry) { var l = userCalls(); l.unshift(entry); OS.store.set('calls', l.slice(0, 50)); }
@@ -23,6 +59,7 @@
   OS.registerApp({
     id: 'phone', name: 'Phone', icon: ICON,
     launch: function (root, args) {
+      scanVoicemails();
       var tab = args.tab || 'dialer', number = '', inCall = null, detail = null;
 
       root.innerHTML =
@@ -141,7 +178,7 @@
         var vb = P.voicemailBox || {};
         if (!c && vb.number && OS.digits(num) === OS.digits(vb.number)) return callVoicemailBox();
         if (c) startCall({ kind: 'contact', contact: c, number: c.number,
-          file: c.voicemail || ('media/voicemail/' + c.id + '.mp3'), text: c.voicemailText, ring: c.ringSeconds });
+          file: voicemailFor(c), text: c.voicemailText, ring: c.ringSeconds });
         else startCall({ kind: 'unknown', number: num, file: (C.sounds || {}).notInService, text: P.notInServiceText, ring: 1.5 });
       }
       function callVoicemailBox() {

@@ -8,9 +8,12 @@ What plays when someone dials a contact. The phone rings for a few seconds, then
 |---|---|
 | `mom` | `mom.mp3` |
 | `booker` | `booker.mp3` |
+| `writer` (Ray) | `writer.mp3` |
 | `donotanswer` | `donotanswer.mp3` |
 | `landlord` | `landlord.mp3` |
 | *(the dialer's voicemail button, or dialing 123)* | `voicemail-box.mp3` |
+
+**More than one voicemail for someone?** Number them: `writer-1.mp3`, `writer-2.mp3`, `writer-3.mp3`… (no gaps). Each call plays a different one, going through all of them before any repeat. Works for any contact.
 
 Want a different name? Add `voicemail: "media/voicemail/whatever.mp3"` to that contact in `content.js`.
 
