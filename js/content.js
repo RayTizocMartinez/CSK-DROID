@@ -159,7 +159,7 @@ window.PHONE_CONTENT = {
       voicemailText: "You called back. Nobody calls back. Check your pictures." },
     { id: "writer", name: "Ray", number: "210-555-0168",
       voicemailText: "It's Ray. I'm writing. Rate the prompts, I can see when you don't." },
-    { id: "landlord", name: "Landlord", number: "210-555-0117",
+    { id: "landlord", name: "Comedian Nick Martin", number: "210-555-0117",
       voicemailText: "This is about the noise. The laughing. At three in the morning. Please stop rehearsing in the bathtub." }
   ],
 
